@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import StarRatings from 'react-star-ratings';
+import { ajaxPost } from 'services/BaseService';
 export function Rating({ setModalOpen }: any) {
   const [feedback, setFeedback] = useState<string>('');
   const [star, setStar] = useState<number>(0);
@@ -8,7 +9,14 @@ export function Rating({ setModalOpen }: any) {
     setFeedback(value);
   };
   const onSubmit = () => {
-    console.log('star', star, 'opinin', feedback);
+    const postEval = async () => {
+      const response = await ajaxPost('/mail', {
+        evaluate_text: feedback,
+        rating: star,
+      });
+      return response;
+    };
+    postEval();
     setModalOpen(false);
   };
 
