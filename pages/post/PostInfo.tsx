@@ -12,6 +12,8 @@ import SelectForm from '../../components/select/SelectForm';
 import DatePickerForm from '../../components/picker/DatePickerForm';
 import PostHeader from 'components/Header/PostHeader';
 import PostButton from 'components/Button/PostButton';
+import { ajaxPost } from 'services/BaseService';
+import Router from 'next/router.js';
 
 const Editor = dynamic(() => import('../../components/editor/Editor'), {
   ssr: false,
@@ -152,9 +154,16 @@ const PostInfo: NextPage = () => {
 
   const onSubmitHandler = () => {
     const errorKey = searchKey();
+    const postBoard = async () => {
+      const response = await ajaxPost('/board', requestData);
+      console.log(response);
+      return response;
+    };
+    postBoard();
     if (errorKey) {
       showErrorToast(errorKey);
     } else {
+      Router.push('/');
       console.log('성공');
       // api
     }

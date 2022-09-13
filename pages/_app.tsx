@@ -7,15 +7,13 @@ import { tempAuthLogin } from 'services/LoginService';
 import { setCookie, isCookieExist } from 'utils/common';
 
 function MyApp({ Component, pageProps }: AppProps) {
-
   const queryClient = new QueryClient();
-  
+
   useEffect(() => {
     const isCookie = isCookieExist('accessToken');
     if (!isCookie) {
       tempLogin();
-    }else {
-
+    } else {
     }
   }, []);
 

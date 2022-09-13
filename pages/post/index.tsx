@@ -5,8 +5,6 @@ import FooterButton from './FooterButton';
 import PostInfo from './PostInfo';
 
 const postMain: NextPage = () => {
-
-
   return (
     <>
       <MainHeader />

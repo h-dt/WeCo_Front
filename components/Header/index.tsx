@@ -12,7 +12,7 @@ export function MainHeader() {
         onClick={() => Router.push('/')}
       />
       <div className="flex gap-8 items-center">
-        <HeaderRouter route="write" text="새글쓰기" />
+        <HeaderRouter route="post" text="새글쓰기" />
         <HeaderRouter route="login" text="로그인" />
       </div>
     </nav>

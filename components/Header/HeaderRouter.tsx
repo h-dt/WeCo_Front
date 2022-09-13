@@ -3,8 +3,10 @@ import Router from 'next/router';
 type props = {
   route: string;
   text: string;
+  user: [];
 };
-export function HeaderRouter({ route, text }: props) {
+export function HeaderRouter({ route, text, user }: props) {
+  console.log(user);
   return (
     <button
       className="text-xl font-semibold"
