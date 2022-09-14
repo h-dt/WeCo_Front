@@ -6,7 +6,6 @@ type props = {
   user: [];
 };
 export function HeaderRouter({ route, text, user }: props) {
-  console.log(user);
   return (
     <button
       className="text-xl font-semibold"

@@ -1,73 +1,119 @@
-import React from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { IoArrowBack as Back } from 'react-icons/io5';
-import { FcLinux as Penguin } from 'react-icons/fc';
+import { IoCloseCircleSharp as Remove } from 'react-icons/io5';
 
 import { MainHeader } from 'components/Header';
-import { projectData } from 'data/SampleData';
+import { ajaxDelete, ajaxGet, ajaxPost } from 'services/BaseService';
+import { useQuery } from 'react-query';
 
 const PostDetail = () => {
   const router = useRouter();
-  const { query } = router;
-  const { did } = query;
+  const [comment, setComment] = useState('');
+  const [resetValue, setResetValue] = useState(false);
+  const getComment = async () => {
+    const result = await ajaxGet(`/comment/${router.query.did}`);
+    return result.data;
+  };
+  const getRecommend = async () => {
+    const result = await ajaxGet('/board/recommend');
+    return result.data;
+  };
+  const getBoard = async () => {
+    const result = await ajaxGet(`/board/${router.query.did}`);
+    return result;
+  };
+  const { isLoading: commentLoading, data: commentData } = useQuery(
+    'commentdata',
+    getComment
+  );
+  const { isLoading: recommendLoading, data: recommendData } = useQuery(
+    'recommenddata',
+    getRecommend
+  );
+  const { isLoading: boardLoading, data: boardData } = useQuery(
+    'boarddata',
+    getBoard
+  );
 
-  const data = projectData.find(({ id }) => id === parseInt(did as string));
-  const { title, explan, skills } = data || {};
-
+  if (!commentData && !recommendData && !boardData) {
+    return <span>로딩중입니다</span>;
+  }
   const handleBack = () => {
     router.back();
+  };
+  const handleDelete = () => {
+    const result = async () => {
+      await ajaxDelete(`/board/${router.query.did}`, { id: router.query.did });
+    };
+    result();
+  };
+  const onComment = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setComment(e.target.value);
+  };
+  const onCommentSubmit = () => {
+    const postComment = async () => {
+      const response = await ajaxPost('/comment', {
+        board_id: boardData?.data.id,
+        content: comment,
+      });
+      console.log(response);
+      return response;
+    };
+    setResetValue(true);
+    postComment();
   };
   return (
     <>
       <MainHeader />
+
       <div className="relative max-w-4xl mx-auto px-4 pt-4 pb-12">
         {/* back */}
-        <div className="mt-12">
+        <div className="mt-12 flex justify-between">
           <Back size="36" onClick={handleBack} className="text-gray-500" />
+          <Remove size="36" onClick={handleDelete} className="text-gray-500" />
         </div>
         {/* title */}
         <div className="text-5xl sm:text-3xl xs:text-2xl font-bold mt-12">
-          {title}
+          {boardData?.data.title}
         </div>
         {/* profile */}
         <div className="flex items-center py-8 text-lg gap-4 border-b-2">
-          <div className="font-bold pr-4 border-r-2">네네오</div>
-          <div className="text-gray-500">2022.08.14</div>
+          <div className="font-bold pr-4 border-r-2">
+            {boardData?.data.writer}
+          </div>
+          <div className="text-gray-500">{boardData?.data.reg_date}</div>
         </div>
         {/* info */}
         <div className="grid grid-cols-2 sm:grid-cols-1 sm:grid-flow-row gap-6 sm:gap-4 py-12">
           <div className="text-xl sm:text-base font-bold">
             <span className="text-gray-500 pr-4">모집 구분</span>
-            <span>프로젝트</span>
+            <span>{boardData?.data.recruit_type}</span>
           </div>
           <div className="text-xl sm:text-base font-bold">
             <span className="text-gray-500 pr-4">진행 방식</span>
-            <span>오프라인</span>
+            <span>{boardData?.data.progress_type}</span>
           </div>
           <div className="text-xl sm:text-base font-bold">
             <span className="text-gray-500 pr-4">모집 인원</span>
-            <span>10명</span>
+            <span>{boardData?.data.recruit_cnt}</span>
           </div>
           <div className="text-xl sm:text-base font-bold">
             <span className="text-gray-500 pr-4">시작 예정</span>
-            <span>2022.08.17</span>
+            <span>{boardData?.data.start_date}</span>
           </div>
           <div className="text-xl sm:text-base font-bold">
             <span className="text-gray-500 pr-4">연락 방법</span>
-            <span>카카오톡 오픈채팅</span>
+            <span>{boardData?.data.contact_type}</span>
           </div>
           <div className="text-xl sm:text-base font-bold">
             <span className="text-gray-500 pr-4">예상 기간</span>
-            <span>3개월</span>
+            <span>{boardData?.data.duration}</span>
           </div>
           <div className="text-xl sm:text-base font-bold flex items-center">
             <span className="text-gray-500 pr-4">사용 언어</span>
-            <span className="flex gap-1">
-              {skills?.map((skill) => (
-                <embed src={skill} width="36" height="36" />
-              ))}
-            </span>
+            <span className="flex gap-1">{boardData?.data.skills}</span>
           </div>
         </div>
         {/* project introduce */}
@@ -75,47 +121,44 @@ const PostDetail = () => {
           <div className="pb-8 text-2xl font-bold border-b-2">
             프로젝트 소개
           </div>
-          <div className="py-8">{explan}</div>
+          <div className="py-8">{boardData?.data.content}</div>
         </div>
         {/* comment write */}
         <div className="mt-12">
-          <div className="font-bold text-xl pb-6">1개의 댓글이 있습니다.</div>
+          <div className="font-bold text-xl pb-6">{`${commentData?.length}개의 댓글이 있습니다.`}</div>
           <textarea
             placeholder="댓글을 입력하세요."
             className="w-full border-2 rounded-2xl p-4 mb-2"
+            onChange={onComment}
+            value={resetValue ? '' : undefined}
           />
           <div className="w-full flex justify-end">
-            <button className="bg-gray-900 text-white rounded-full py-2 px-8">
+            <button
+              className="bg-gray-900 text-white rounded-full py-2 px-8"
+              onClick={onCommentSubmit}
+            >
               댓글 등록
             </button>
           </div>
         </div>
         {/* comment list */}
+
         <div className="mt-4">
-          <div className="pb-4">
-            <div className="flex items-center">
-              <div className="bg-red-300 rounded-full p-1 mr-4">
-                <Penguin size="48" />
-              </div>
-              <div>
-                <div className="font-bold">펭수</div>
-                <div className="text-sm text-gray-500">2022-08-15 19:42:18</div>
-              </div>
-            </div>
-            <div className="text-lg py-4 border-b">Gooooooood!</div>
-          </div>
-          <div className="pb-4">
-            <div className="flex items-center">
-              <div className="bg-red-300 rounded-full p-1 mr-4">
-                <Penguin size="48" />
-              </div>
-              <div>
-                <div className="font-bold">펭수</div>
-                <div className="text-sm text-gray-500">2022-08-15 19:42:18</div>
-              </div>
-            </div>
-            <div className="text-lg py-4 border-b">Gooooooood!</div>
-          </div>
+          {commentData &&
+            commentData?.map((x: any) => {
+              <div className="pb-4">
+                <div className="flex items-center">
+                  <div className="bg-red-300 rounded-full p-1 mr-4">
+                    <img src={x.profileImage} sizes="12" />
+                  </div>
+                  <div>
+                    <div className="font-bold">{x.nickname}</div>
+                    <div className="text-sm text-gray-500">{x.regDate}</div>
+                  </div>
+                </div>
+                <div className="text-lg py-4 border-b">{x.content}</div>
+              </div>;
+            })}
         </div>
         {/* recomment post */}
         <div className="absolute left-full top-96 2xl:hidden">
@@ -127,15 +170,13 @@ const PostDetail = () => {
             </div>
           </div>
           <div className="w-60 border-2 rounded-lg px-2 py-4 text-sm">
-            <div>
-              <span className="text-blue-300">1. </span>개발자 추가 모집
-            </div>
-            <div>
-              <span className="text-blue-300">2. </span>개발자 추가 모집
-            </div>
-            <div>
-              <span className="text-blue-300">3. </span>개발자 추가 모집
-            </div>
+            {recommendData &&
+              recommendData?.map((x: any) => {
+                <div>
+                  <span className="text-blue-300">{x.board_id} </span>
+                  {x.title}
+                </div>;
+              })}
           </div>
         </div>
       </div>
