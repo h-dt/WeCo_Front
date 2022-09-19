@@ -152,14 +152,26 @@ const PostDetail = () => {
           {commentData &&
             commentData?.map((x: any) => (
               <div className="pb-4" key={Math.random()}>
-                <div className="flex items-center">
-                  <div className="bg-red-300 rounded-full p-1 mr-4">
-                    <img src={x.profileImage} width="24" height="24" />
+                <div className="flex items-center justify-between">
+                  <div className="flex">
+                    <div className="bg-red-300 rounded-full p-1 mr-4">
+                      <img src={x.profileImage} width="36" height="24" />
+                    </div>
+                    <div>
+                      <div className="font-bold">{x.nickname}</div>
+                      <div className="text-sm text-gray-500">{x.regDate}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-bold">{x.nickname}</div>
-                    <div className="text-sm text-gray-500">{x.regDate}</div>
-                  </div>
+                  {x.nickname === userData?.data.nickname ? (
+                    <div>
+                      <div className="flex">
+                        <div className="ml-2">수정</div>
+                        <div className="ml-2">삭제</div>
+                      </div>
+                    </div>
+                  ) : (
+                    ''
+                  )}
                 </div>
                 <div className="text-lg py-4 border-b">{x.content}</div>
               </div>
