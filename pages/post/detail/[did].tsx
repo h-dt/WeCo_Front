@@ -7,7 +7,18 @@ import { IoCloseCircleSharp as Remove } from 'react-icons/io5';
 import { MainHeader } from 'components/Header';
 import { ajaxDelete, ajaxGet, ajaxPost } from 'services/BaseService';
 import { useQuery } from 'react-query';
-import { indexOf } from 'ramda';
+
+interface commentType {
+  content: string;
+  nickname: string;
+  profileImage: string;
+  regDate: string;
+}
+
+interface recommendType {
+  board_id: number;
+  title: string;
+}
 
 const PostDetail = () => {
   const router = useRouter();
@@ -51,6 +62,12 @@ const PostDetail = () => {
   const handleDelete = () => {
     const result = async () => {
       await ajaxDelete(`/board/${router.query.did}`, { id: router.query.did });
+    };
+    result();
+  };
+  const handleDeleteComment = () => {
+    const result = async () => {
+      await ajaxDelete('comment', { id: router.query.did });
     };
     result();
   };
@@ -150,7 +167,7 @@ const PostDetail = () => {
 
         <div className="mt-4">
           {commentData &&
-            commentData?.map((x: any) => (
+            commentData?.map((x: commentType) => (
               <div className="pb-4" key={Math.random()}>
                 <div className="flex items-center justify-between">
                   <div className="flex">
@@ -166,7 +183,9 @@ const PostDetail = () => {
                     <div>
                       <div className="flex">
                         <div className="ml-2">수정</div>
-                        <div className="ml-2">삭제</div>
+                        <div className="ml-2" onClick={handleDeleteComment}>
+                          삭제
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -188,7 +207,7 @@ const PostDetail = () => {
           </div>
           <div className="w-60 border-2 rounded-lg px-2 py-4 text-sm">
             {recommendData &&
-              recommendData?.map((x: any) => (
+              recommendData?.map((x: recommendType) => (
                 <div key={x.board_id} className="mb-2">
                   <span className="text-blue-300">
                     {`${recommendData.indexOf(x) + 1}. `}
