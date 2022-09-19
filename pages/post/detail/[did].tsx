@@ -7,6 +7,7 @@ import { IoCloseCircleSharp as Remove } from 'react-icons/io5';
 import { MainHeader } from 'components/Header';
 import { ajaxDelete, ajaxGet, ajaxPost } from 'services/BaseService';
 import { useQuery } from 'react-query';
+import { indexOf } from 'ramda';
 
 const PostDetail = () => {
   const router = useRouter();
@@ -24,6 +25,11 @@ const PostDetail = () => {
     const result = await ajaxGet(`/board/${router.query.did}`);
     return result;
   };
+  const getUser = async () => {
+    const result = await ajaxGet('/member');
+    return result;
+  };
+  const { data: userData } = useQuery('userdata', getUser);
   const { isLoading: commentLoading, data: commentData } = useQuery(
     'commentdata',
     getComment
@@ -36,9 +42,8 @@ const PostDetail = () => {
     'boarddata',
     getBoard
   );
-
-  if (!commentData && !recommendData && !boardData) {
-    return <span>로딩중입니다</span>;
+  if (commentLoading && recommendLoading && boardLoading) {
+    return <h1>로딩중입니다</h1>;
   }
   const handleBack = () => {
     router.back();
@@ -145,11 +150,11 @@ const PostDetail = () => {
 
         <div className="mt-4">
           {commentData &&
-            commentData?.map((x: any) => {
-              <div className="pb-4">
+            commentData?.map((x: any) => (
+              <div className="pb-4" key={Math.random()}>
                 <div className="flex items-center">
                   <div className="bg-red-300 rounded-full p-1 mr-4">
-                    <img src={x.profileImage} sizes="12" />
+                    <img src={x.profileImage} width="24" height="24" />
                   </div>
                   <div>
                     <div className="font-bold">{x.nickname}</div>
@@ -157,26 +162,28 @@ const PostDetail = () => {
                   </div>
                 </div>
                 <div className="text-lg py-4 border-b">{x.content}</div>
-              </div>;
-            })}
+              </div>
+            ))}
         </div>
         {/* recomment post */}
         <div className="absolute left-full top-96 2xl:hidden">
           <div className="flex items-center mb-4">
             <div className="w-0 h-10 border-2 border-blue-500 bg-blue-500 mr-2" />
             <div className="whitespace-pre-wrap">
-              <span className="font-bold">펭수</span>
+              <span className="font-bold">{userData?.data.nickname}</span>
               {`님이\n좋아하실 글을 모아봤어요!`}
             </div>
           </div>
           <div className="w-60 border-2 rounded-lg px-2 py-4 text-sm">
             {recommendData &&
-              recommendData?.map((x: any) => {
-                <div>
-                  <span className="text-blue-300">{x.board_id} </span>
-                  {x.title}
-                </div>;
-              })}
+              recommendData?.map((x: any) => (
+                <div key={x.board_id} className="mb-2">
+                  <span className="text-blue-300">
+                    {`${recommendData.indexOf(x) + 1}. `}
+                  </span>
+                  {x.title.length > 15 ? `${x.title.slice(0, 15)}...` : x.title}
+                </div>
+              ))}
           </div>
         </div>
       </div>
