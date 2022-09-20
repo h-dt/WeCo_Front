@@ -13,6 +13,8 @@ interface commentType {
   nickname: string;
   profileImage: string;
   regDate: string;
+  boardId: number;
+  commentId: number;
 }
 
 interface recommendType {
@@ -65,11 +67,14 @@ const PostDetail = () => {
     };
     result();
   };
-  const handleDeleteComment = () => {
+  const handleDeleteComment = (id: number) => {
     const result = async () => {
-      await ajaxDelete('comment', { id: router.query.did });
+      await ajaxDelete(`comment/${id}`);
     };
-    result();
+    if (window.confirm('삭제하시겠습니까?') === true) {
+      result();
+    }
+    return;
   };
   const onComment = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setComment(e.target.value);
@@ -182,8 +187,11 @@ const PostDetail = () => {
                   {x.nickname === userData?.data.nickname ? (
                     <div>
                       <div className="flex">
-                        <div className="ml-2">수정</div>
-                        <div className="ml-2" onClick={handleDeleteComment}>
+                        <div className="ml-2 cursor-pointer">수정</div>
+                        <div
+                          className="ml-2 cursor-pointer"
+                          onClick={() => handleDeleteComment(x.commentId)}
+                        >
                           삭제
                         </div>
                       </div>

@@ -68,7 +68,7 @@ export const ajaxPut = async <T = any,>(
 
 export const ajaxDelete = async <T = any,>(
   subUrl: string,
-  params: any
+  params?: any
 ): Promise<AxiosResponse<T>> => {
   return instance.delete(subUrl, params);
 };
